@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+__pycache__/
+.ipynb_checkpoints/
+# 数据、模型、图片不进仓库
+*.tar
+*.bin
+*.jpg

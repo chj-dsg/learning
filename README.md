@@ -1,2 +1,1 @@
 # learning
-use for learning
