@@ -19,7 +19,6 @@ def build_review(groups, out_name):
     for g in groups.values():
         wanted.update(g["key"])
 
-    # 遍历一遍数据，把需要的图片存出来，顺便记下原图尺寸
     extra = {}
     for sample in wds.WebDataset(sorted(glob.glob(SHARDS)), shardshuffle=False):
         key = sample["__key__"]
@@ -36,21 +35,26 @@ def build_review(groups, out_name):
         ".card{width:260px;border:1px solid #ccc;padding:8px;font-size:12px}",
         ".card img{width:100%;height:200px;object-fit:contain;background:#eee}",
         ".cap{margin:6px 0;font-size:13px}",
+        ".score{color:#c00;font-weight:bold}",
         "</style></head><body>",
     ]
     for name, g in groups.items():
         parts.append(f"<h2>{html.escape(name)}（{len(g)} 条）</h2><div class='grid'>")
         for _, r in g.iterrows():
             ow, oh = extra.get(r["key"], (None, None))
-            parts.append(
-                "<div class='card'>"
-                f"<img src='images/{r['key']}.jpg'>"
-                f"<div class='cap'>{html.escape(str(r['caption']))}</div>"
+            card = [
+                "<div class='card'>",
+                f"<img src='images/{r['key']}.jpg'>",
+                f"<div class='cap'>{html.escape(str(r['caption']))}</div>",
+            ]
+            if "clip_score" in r.index:
+                card.append(f"<div class='score'>CLIP 分数 {r['clip_score']:.3f}</div>")
+            card.append(
                 f"编号 {r['key']} ｜ {r['n_words']} 词 ｜ {r['lang']} {r['lang_score']:.2f}<br>"
                 f"尺寸 {r['width']:.0f}×{r['height']:.0f}（原图 {ow}×{oh}）｜ {r['file_kb']:.1f} KB<br>"
-                f"来源 {html.escape(str(r['domain']))}"
-                "</div>"
+                f"来源 {html.escape(str(r['domain']))}</div>"
             )
+            parts.append("".join(card))
         parts.append("</div>")
     parts.append("</body></html>")
 
